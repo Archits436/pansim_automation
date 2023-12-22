@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "527412049967",
+    "firebase_url": "https://flutter-login-12573-default-rtdb.firebaseio.com",
+    "project_id": "flutter-login-12573",
+    "storage_bucket": "flutter-login-12573.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527412049967:android:1904c215c4c69339caeeda",
+        "android_client_info": {
+          "package_name": "com.pansim.login"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "527412049967-rlfi05ovr20h75hegr2tomdtj2kemifh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pansim.login",
+            "certificate_hash": "60a93926d185e397f3790cd417844f75d1a76045"
+          }
+        },
+        {
+          "client_id": "527412049967-ctlk9lntl9j1n1caacr22djoslsqd34s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6yFBemS8e_ymbuTKwoBQEVDQ25tLTGqM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "527412049967-ctlk9lntl9j1n1caacr22djoslsqd34s.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "527412049967-qc9c66nbpoedph9pdqgbb92g980ldpld.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.pansim.login"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
