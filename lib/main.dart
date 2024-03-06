@@ -7,9 +7,12 @@ import 'package:flutter_firebase/features/user_auth/presentation/pages/addevice.
 import 'package:flutter_firebase/features/user_auth/presentation/pages/home_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/login_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/sign_up_page.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.openBox('passBox');
   if (kIsWeb) {
     await Firebase.initializeApp(
       options: FirebaseOptions(

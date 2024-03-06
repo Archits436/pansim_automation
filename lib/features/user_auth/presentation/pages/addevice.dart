@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,6 +32,7 @@ class _AddeviceState extends State<Addevice> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   final _db = FirebaseFirestore.instance;
   final User? user = FirebaseAuth.instance.currentUser;
+  Box passBox = Hive.box('passBox');
 
   @override
   void reassemble() {
@@ -96,6 +98,7 @@ class _AddeviceState extends State<Addevice> {
   }
 
   Widget _buildQrView(BuildContext context) {
+
     var scanArea = (MediaQuery.of(context).size.width < 300 ||
             MediaQuery.of(context).size.height < 300)
         ? 150.0
@@ -123,6 +126,7 @@ class _AddeviceState extends State<Addevice> {
     controller.scannedDataStream.listen((scanData) async {
       String macAddress = scanData.code as String;
       print(macAddress);
+      
       if (user != null) {
         await storeDeviceInFirebase(UserModel(
           userId: user!.uid,
@@ -145,6 +149,8 @@ class _AddeviceState extends State<Addevice> {
       FirebaseAuth auth = FirebaseAuth.instance;
       User? user = auth.currentUser;
       String email = user?.email ?? "";
+      String password = passBox.get('pass');
+       print(password);
       // String password = await _enterPassword();
       // String credentials = "$email,password";
       final Uri url = Uri.parse('http://192.168.1.16:80/receive-email');

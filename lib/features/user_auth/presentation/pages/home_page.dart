@@ -1,6 +1,6 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../../global/common/toast.dart';
 
@@ -12,6 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Box passBox = Hive.box('passBox');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +27,6 @@ class _HomePageState extends State<HomePage> {
                 child: Text(
               " PANSIM HOME AUTOMATION ",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
-
             )),
             SizedBox(
               height: 250,
@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () {
                 //  FirebaseAuth.instance.signOut();
                 Navigator.pushNamed(context, "/addevice");
-               // showToast(message: "Successfully signed out");
+                // showToast(message: "Successfully signed out");
               },
               child: Container(
                 height: 45,
@@ -50,40 +50,34 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 18),
-
                   ),
                 ),
               ),
             ),
             SizedBox(
               height: 220,
-
             ),
             GestureDetector(
-              onTap: () {
-                FirebaseAuth.instance.signOut();
-                Navigator.pushNamed(context, "/login");
-                showToast(message: "Successfully signed out");
-              },
-              child: Container(
-              height: 45,
-              width: 150,
-              decoration: BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.circular(10)),
-              child: Center(
-              child: Text(
-               "Logout",
-                style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18),
-
-                )
-              )
-              )
-            )
-
+                onTap: () async{
+                  FirebaseAuth.instance.signOut();
+                  await passBox.delete('pass');
+                  Navigator.pushNamed(context, "/login");
+                  showToast(message: "Successfully signed out");
+                },
+                child: Container(
+                    height: 45,
+                    width: 150,
+                    decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                        child: Text(
+                      "Logout",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
+                    ))))
           ],
         ));
   }
