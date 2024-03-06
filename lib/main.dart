@@ -29,21 +29,19 @@ Future main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Firebase',
       routes: <String, WidgetBuilder>{
         '/': (context) => SplashScreen(
-          // Here, you can decide whether to show the LoginPage or HomePage based on user authentication
-          child: LoginPage(),
-        ),
+              // Here, you can decide whether to show the LoginPage or HomePage based on user authentication
+              child: LoginPage(),
+            ),
         '/login': (context) => LoginPage(),
         '/signUp': (context) => SignUpPage(),
         '/home': (context) => HomePage(),
         '/addevice': (context) => Addevice(),
       },
-
     );
   }
 }

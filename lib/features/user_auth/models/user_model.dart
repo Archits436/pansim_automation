@@ -1,21 +1,24 @@
 class UserModel {
   final String? id;
-  final String email;
+  final String userId;
   final String macAddress;
   final String status;
+  final String wifi;
 
   const UserModel({
     this.id,
-    required this.email,
+    required this.userId,
     required this.macAddress,
     required this.status,
+    required this.wifi,
   });
 
   toJson() {
     return {
-      "Email": email,
+      "User Id": userId,
       "Mac Address": macAddress,
       "Status": status,
+      "Wifi": wifi,
     };
   }
 }

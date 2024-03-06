@@ -43,6 +43,8 @@ dependencies:
   font_awesome_flutter: ^10.6.0
   google_sign_in: ^6.1.5
   qr_code_scanner: ^1.0.1
+  network_info_plus: ^4.1.0+1 
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:
