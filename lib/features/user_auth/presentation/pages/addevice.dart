@@ -150,10 +150,10 @@ class _AddeviceState extends State<Addevice> {
       User? user = auth.currentUser;
       String email = user?.email ?? "";
       String password = passBox.get('pass');
-       print(password);
+       print('password'+password);
       // String password = await _enterPassword();
       // String credentials = "$email,password";
-      final Uri url = Uri.parse('http://192.168.1.16:80/receive-email');
+      final Uri url = Uri.parse('http://192.168.1.15:80/receive-email');
       Map<String, String> headers = {"Content-type": "application/json"};
       String jsonBody = json.encode({"email": email});
       try {
