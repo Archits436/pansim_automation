@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 // Import Firebase Auth
 import 'package:flutter_firebase/features/app/splash_screen/splash_screen.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/addevice.dart';
+import 'package:flutter_firebase/features/user_auth/presentation/pages/devices_fail.dart';
+import 'package:flutter_firebase/features/user_auth/presentation/pages/devices_success.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/home_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/login_page.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/sign_up_page.dart';
@@ -44,6 +46,8 @@ class MyApp extends StatelessWidget {
         '/signUp': (context) => SignUpPage(),
         '/home': (context) => HomePage(),
         '/addevice': (context) => Addevice(),
+        '/devices_success': (context) => DevicesSuccess(),
+        '/devices_fail': (context) => DevicesFail(),
       },
     );
   }

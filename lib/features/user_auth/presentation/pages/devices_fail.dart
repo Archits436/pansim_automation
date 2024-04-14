@@ -1,19 +1,20 @@
+import 'package:flutter/material.dart';
+
 import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../../../global/common/toast.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class DevicesFail extends StatefulWidget {
+  const DevicesFail({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<DevicesFail> createState() => _DevicesFailState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _DevicesFailState extends State<DevicesFail> {
   Box passBox = Hive.box('passBox');
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                       margin: EdgeInsets.only(top: 50),
                       child: Center(
                         child: Text(
-                          " PANSIM HOME AUTOMATION ",
+                          "PANSIM HOME AUTOMATION",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 30,
@@ -68,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       child: Text(
-                        " Add devices to control them with your mobile phone ! ",
+                        "Please add a device to continue.",
                         style: TextStyle(fontSize: 20, color: Colors.white),
                         textAlign: TextAlign.center,
                       ),
@@ -78,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         //  FirebaseAuth.instance.signOut();
                         Navigator.pushNamed(context, "/addevice");
-                        // showToast(message: "Successfully signed out");
+                        // showToast(message: "Failly signed out");
                       },
                       child: Container(
                         height: 45,
@@ -108,7 +109,7 @@ class _HomePageState extends State<HomePage> {
                   FirebaseAuth.instance.signOut();
                   await passBox.delete('pass');
                   Navigator.pushNamed(context, "/login");
-                  showToast(message: "Successfully signed out");
+                  showToast(message: "Failly signed out");
                 },
                 child: Container(
                   height: 45,
