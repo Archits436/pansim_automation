@@ -3,14 +3,14 @@ class UserModel {
   final String userId;
   final String macAddress;
   final String status;
-  final String wifi;
+  // final String wifi;
 
   const UserModel({
     this.id,
     required this.userId,
     required this.macAddress,
     required this.status,
-    required this.wifi,
+    // required this.wifi,
   });
 
   toJson() {
@@ -18,7 +18,7 @@ class UserModel {
       "User Id": userId,
       "Mac Address": macAddress,
       "Status": status,
-      "Wifi": wifi,
+      // "Wifi": wifi,
     };
   }
 }

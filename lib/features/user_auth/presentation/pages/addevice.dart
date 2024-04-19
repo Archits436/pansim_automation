@@ -1,5 +1,6 @@
 // ignore_for_file: body_might_complete_normally_catch_error, unnecessary_null_comparison
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
@@ -58,9 +59,15 @@ class _AddeviceState extends State<Addevice> {
   Future<void> _checkPermissionsAndEnableBluetooth() async {
     PermissionStatus bluetoothStatus = await Permission.bluetooth.request();
     if (bluetoothStatus == PermissionStatus.granted) {
-      await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
-      await Future.delayed(Duration(seconds: 4));
-      await FlutterBluePlus.stopScan();
+      bool isBluetoothOn =
+          await FlutterBluePlus.adapterState.first == BluetoothAdapterState.on;
+      if (!isBluetoothOn) {
+        // Bluetooth is off, turn it on
+        if (Platform.isAndroid) {
+          await FlutterBluePlus.turnOn();
+        }
+      }
+      print("WE HAVE BLUETOOTH");
     }
     if (bluetoothStatus == PermissionStatus.denied) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -162,9 +169,9 @@ class _AddeviceState extends State<Addevice> {
     setState(() {
       this.controller = controller;
     });
-    final info = NetworkInfo();
-    final wifiName = await info.getWifiName();
-    print(wifiName);
+    // final info = NetworkInfo();
+    // final wifiName = await info.getWifiName();
+    // print(wifiName);
     controller.scannedDataStream.listen((scanData) async {
       if (!scanned) {
         scanned = true;
@@ -174,7 +181,7 @@ class _AddeviceState extends State<Addevice> {
             userId: user!.uid,
             macAddress: macAddress,
             status: 'active',
-            wifi: wifiName!,
+            // wifi: wifiName!,
           ));
         } else {
           showToast(message: "User not authenticated.");
@@ -194,8 +201,29 @@ class _AddeviceState extends State<Addevice> {
       String email = user.email ?? "";
       String password = passBox.get('pass') ?? "";
       String credentials = "$email,$password";
+      await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
+      await FlutterBluePlus.stopScan();
+      Stream<List<ScanResult>> scanResults = FlutterBluePlus.scanResults;
+      print("SCANNED RESULTS = ${scanResults.toString()}");
+      // var subscription = FlutterBluePlus.onScanResults.listen(
+      //   (results) {
+      //     if (results.isNotEmpty) {
+      //       ScanResult r = results.last; // the most recently found device
+      //       print(
+      //           '${r.device.remoteId}: "${r.advertisementData.advName}" found!');
+      //     } else {
+      //       // print("RESULTS IS EMPTY");
+      //     }
+      //   },
+      //   onError: (e) => print("ON ERROR = $e"),
+      // );
+
+      // FlutterBluePlus.cancelWhenScanComplete(subscription);
+
       FlutterBluePlus.scanResults.listen((results) async {
+        print("BLUETOOTH DEVICES = ${results.length}");
         for (ScanResult result in results) {
+          print("RESULT IS HERE");
           if (result.device.name == "ESP32_BLE_Credentials") {
             if (result != null) {
               await result.device.connect();
@@ -210,13 +238,20 @@ class _AddeviceState extends State<Addevice> {
                         c.uuid == Guid('beb5483e-36e1-4688-b7f5-ea07361b26a8'),
                   );
                   if (characteristic != null) {
-                    // print("AAAAAAAAAAAAAAAAAAA");
                     List<int> dataToSend = utf8.encode("$credentials");
                     await characteristic.write(dataToSend,
                         withoutResponse: true);
                     print('Data sent to Arduino via BLE: $dataToSend');
                     showToast(message: "Data sent to Arduino via BLE !");
-                    // print("YAY");
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userModel.macAddress.replaceAll('/', '-'))
+                        .set(userModel.toJson());
+                    print('Device linked successfully!');
+                    // showToast(message: "Device linked successfully !");
+                    if (mounted) {
+                      Navigator.pushNamed(context, '/home');
+                    }
                   } else {
                     print('Characteristic not found');
                     showToast(message: "Characteristic not found");
@@ -234,16 +269,6 @@ class _AddeviceState extends State<Addevice> {
           }
         }
       });
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userModel.macAddress.replaceAll('/', '-'))
-          .set(userModel.toJson());
-      print('Device linked successfully!');
-      // showToast(message: "Device linked successfully !");
-      if (mounted) {
-        Navigator.pushNamed(context, '/home');
-      }
     } catch (error) {
       print('Error linking device: $error');
       showToast(message: "Error linking device: $error");
