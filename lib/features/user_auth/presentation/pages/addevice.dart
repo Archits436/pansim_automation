@@ -41,6 +41,7 @@ class _AddeviceState extends State<Addevice> {
   void initState() {
     super.initState();
     _checkPermissionsAndEnableBluetooth();
+     strtScanning();
   }
 
   @override
@@ -80,10 +81,11 @@ class _AddeviceState extends State<Addevice> {
 
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
       body: Column(
         children: <Widget>[
-          Expanded(flex: 3, child: _buildQrView(context)),
+          //Expanded(flex: 3, child: _buildQrView(context)),
           Expanded(
             flex: 1,
             child: Container(
@@ -173,20 +175,20 @@ class _AddeviceState extends State<Addevice> {
     // final wifiName = await info.getWifiName();
     // print(wifiName);
     controller.scannedDataStream.listen((scanData) async {
-      if (!scanned) {
-        scanned = true;
-        String macAddress = scanData.code as String;
-        if (user != null) {
-          await storeDeviceInFirebase(UserModel(
-            userId: user!.uid,
-            macAddress: macAddress,
-            status: 'active',
-            // wifi: wifiName!,
-          ));
-        } else {
-          showToast(message: "User not authenticated.");
-        }
-      }
+      // if (!scanned) {
+      // scanned = true;
+      String macAddress = scanData.code as String;
+      //if (user != null) {
+      await storeDeviceInFirebase(UserModel(
+        userId: user!.uid,
+        macAddress: macAddress,
+        status: 'active',
+        // wifi: wifiName!,
+      ));
+      //} else {
+      showToast(message: "User not authenticated.");
+      // }
+      //}
     });
   }
 
@@ -201,11 +203,17 @@ class _AddeviceState extends State<Addevice> {
       String email = user.email ?? "";
       String password = passBox.get('pass') ?? "";
       String credentials = "$email,$password";
-      await FlutterBluePlus.startScan(timeout: Duration(seconds: 4));
-      await FlutterBluePlus.stopScan();
-      Stream<List<ScanResult>> scanResults = FlutterBluePlus.scanResults;
-      print("SCANNED RESULTS = ${scanResults.toString()}");
-      // var subscription = FlutterBluePlus.onScanResults.listen(
+      if (scanned == false) {
+        setState(() {
+          scanned = true;
+        });
+        // strtScanning();
+      }
+
+      // await FlutterBluePlus.stopScan();
+      // Stream<List<ScanResult>> scanResults = FlutterBluePlus.scanResults;
+      // print("SCANNED RESULTS = ${scanResults.toString()}");
+      // FlutterBluePlus.onScanResults.listen(
       //   (results) {
       //     if (results.isNotEmpty) {
       //       ScanResult r = results.last; // the most recently found device
@@ -219,56 +227,6 @@ class _AddeviceState extends State<Addevice> {
       // );
 
       // FlutterBluePlus.cancelWhenScanComplete(subscription);
-
-      FlutterBluePlus.scanResults.listen((results) async {
-        print("BLUETOOTH DEVICES = ${results.length}");
-        for (ScanResult result in results) {
-          print("RESULT IS HERE");
-          if (result.device.name == "ESP32_BLE_Credentials") {
-            if (result != null) {
-              await result.device.connect();
-              List<BluetoothService> services =
-                  await result.device.discoverServices();
-              for (BluetoothService service in services) {
-                if (service.uuid ==
-                    Guid('4fafc201-1fb5-459e-8fcc-c5c9c331914b')) {
-                  BluetoothCharacteristic? characteristic =
-                      service.characteristics.firstWhere(
-                    (c) =>
-                        c.uuid == Guid('beb5483e-36e1-4688-b7f5-ea07361b26a8'),
-                  );
-                  if (characteristic != null) {
-                    List<int> dataToSend = utf8.encode("$credentials");
-                    await characteristic.write(dataToSend,
-                        withoutResponse: true);
-                    print('Data sent to Arduino via BLE: $dataToSend');
-                    showToast(message: "Data sent to Arduino via BLE !");
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userModel.macAddress.replaceAll('/', '-'))
-                        .set(userModel.toJson());
-                    print('Device linked successfully!');
-                    // showToast(message: "Device linked successfully !");
-                    if (mounted) {
-                      Navigator.pushNamed(context, '/home');
-                    }
-                  } else {
-                    print('Characteristic not found');
-                    showToast(message: "Characteristic not found");
-                  }
-                } else {
-                  print('Service not found');
-                  showToast(message: "Service not found");
-                }
-              }
-              await result.device.disconnect();
-            } else {
-              print('BLE device not found');
-              showToast(message: "BLE device not found");
-            }
-          }
-        }
-      });
     } catch (error) {
       print('Error linking device: $error');
       showToast(message: "Error linking device: $error");
@@ -278,6 +236,74 @@ class _AddeviceState extends State<Addevice> {
       rethrow;
     }
   }
+
+  void strtScanning() {
+
+FlutterBluePlus.startScan();
+
+// Listen for scan results
+    FlutterBluePlus.onScanResults.listen(
+      (results) {
+        // Iterate through each ScanResult in the results
+        for (ScanResult device in results) {
+          // Print the name of each discovered device
+          print(device.device.name);
+          // You can also add the discovered devices to a list if needed
+          // devicelist.add(device.device.name);
+        }
+      },
+      // Handle any errors that occur during scanning
+      onError: (err) {
+        print("Error occurred during scanning: $err");
+      },
+    );
+
+        // if (result.device.name == "ESP32_BLE_Credentials") {
+        //   if (result != null) {
+        //     await result.device.connect();
+        //     List<BluetoothService> services =
+        //         await result.device.discoverServices();
+        //     for (BluetoothService service in services) {
+        //       if (service.uuid ==
+        //           Guid('4fafc201-1fb5-459e-8fcc-c5c9c331914b')) {
+        //         BluetoothCharacteristic? characteristic =
+        //             service.characteristics.firstWhere(
+        //           (c) =>
+        //               c.uuid == Guid('beb5483e-36e1-4688-b7f5-ea07361b26a8'),
+        //         );
+        //         if (characteristic != null) {
+        //           List<int> dataToSend = utf8.encode("$credentials");
+        //           await characteristic.write(dataToSend,
+        //               withoutResponse: true);
+        //           print('Data sent to Arduino via BLE: $dataToSend');
+        //           showToast(message: "Data sent to Arduino via BLE !");
+        //           await FirebaseFirestore.instance
+        //               .collection('users')
+        //               .doc(userModel.macAddress.replaceAll('/', '-'))
+        //               .set(userModel.toJson());
+        //           print('Device linked successfully!');
+        //           // showToast(message: "Device linked successfully !");
+        //           if (mounted) {
+        //             Navigator.pushNamed(context, '/home');
+        //           }
+        //         } else {
+        //           print('Characteristic not found');
+        //           showToast(message: "Characteristic not found");
+        //         }
+        //       } else {
+        //         print('Service not found');
+        //         showToast(message: "Service not found");
+        //       }
+        //     }
+        //     await result.device.disconnect();
+        //   } else {
+        //     print('BLE device not found');
+        //     showToast(message: "BLE device not found");
+        //   }
+        // }
+      }
+  //   });
+  // }
 
   void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
     log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
