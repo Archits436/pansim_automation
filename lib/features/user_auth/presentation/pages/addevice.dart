@@ -83,9 +83,7 @@ class _AddeviceState extends State<Addevice> {
     }
     String email = user!.email ?? "";
     String password = passBox.get('pass') ?? "";
-    // String credentials = "$email,$password";
 
-    // Add error handling when connecting to the ESP32 device
     void connectWithESP(int index) async {
       try {
         targetDevice = devicesList[index];
