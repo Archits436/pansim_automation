@@ -106,152 +106,170 @@ class _DevicesSuccessState extends State<DevicesSuccess> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/home.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                color: Colors.black.withOpacity(0.5),
-              ),
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25),
-                child: Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Center(
-                    child: Text(
-                      " PANSIM HOME AUTOMATION ",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                          color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+    return WillPopScope(
+      onWillPop: () async {
+        // Exit the app when back button is pressed
+        return true;
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/home.jpg'),
+                  fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(
-                height: 20,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                ),
               ),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(20.0),
-                  children: _appliances.asMap().entries.map<Widget>((entry) {
-                    final index = entry.key;
-                    final appliance = entry.value;
-                    final switchName = 'Switch ${index + 1}';
-                    return GestureDetector(
-                      onTap: () async {
-                        _toggleSwitchStatus(appliance);
-                        setState(() {
-                          appliance['playAnimation'] =
-                              true; // Set to true to play animation
-                        });
-                        // Delay to allow animation to play
-                        await Future.delayed(Duration(milliseconds: 500));
-                        setState(() {
-                          appliance['playAnimation'] =
-                              false; // Set back to false
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
+            ),
+            _appliances.isEmpty // Check if appliances list is empty
+                ? Center(
+                    child: CircularProgressIndicator(
+                        color: Colors.green
+                            .shade600), // Show circular progress indicator
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
                         child: Container(
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: appliance['status'] == 'on' ||
-                                      appliance['status'] == 1
-                                  ? Colors.green.shade600
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: Colors.green.shade600,
-                              ),
+                          margin: EdgeInsets.only(top: 50),
+                          child: Center(
+                            child: Text(
+                              " PANSIM HOME AUTOMATION ",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 30,
+                                  color: Colors.white),
+                              textAlign: TextAlign.center,
                             ),
-                            margin: EdgeInsets.all(10),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Center(
-                                  child: Text(
-                                    switchName,
-                                    style: TextStyle(
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Expanded(
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          padding: EdgeInsets.all(20.0),
+                          children:
+                              _appliances.asMap().entries.map<Widget>((entry) {
+                            final index = entry.key;
+                            final appliance = entry.value;
+                            final switchName = 'Switch ${index + 1}';
+                            return GestureDetector(
+                              onTap: () async {
+                                _toggleSwitchStatus(appliance);
+                                setState(() {
+                                  appliance['playAnimation'] =
+                                      true; // Set to true to play animation
+                                });
+                                // Delay to allow animation to play
+                                await Future.delayed(
+                                    Duration(milliseconds: 500));
+                                setState(() {
+                                  appliance['playAnimation'] =
+                                      false; // Set back to false
+                                });
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Container(
+                                    height: 120,
+                                    decoration: BoxDecoration(
                                       color: appliance['status'] == 'on' ||
                                               appliance['status'] == 1
-                                          ? Colors.white
-                                          : Colors.green.shade600,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+                                          ? Colors.green.shade600
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Colors.green.shade600,
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                Lottie.asset(
-                                  'assets/Lottie/switch.json', // Path to your animation file
-                                  height: 70, // Adjust height as needed
-                                  width: 70, // Adjust width as needed
-                                  fit: BoxFit.cover,
-                                  animate: appliance['playAnimation'] ?? false,
-                                  repeat: false, // Play the animation only once
-                                ),
-                              ],
-                            )),
+                                    margin: EdgeInsets.all(10),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Center(
+                                          child: Text(
+                                            switchName,
+                                            style: TextStyle(
+                                              color: appliance['status'] ==
+                                                          'on' ||
+                                                      appliance['status'] == 1
+                                                  ? Colors.white
+                                                  : Colors.green.shade600,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                        Lottie.asset(
+                                          'assets/Lottie/switch.json', // Path to your animation file
+                                          height: 70, // Adjust height as needed
+                                          width: 70, // Adjust width as needed
+                                          fit: BoxFit.cover,
+                                          animate: appliance['playAnimation'] ??
+                                              false,
+                                          repeat:
+                                              false, // Play the animation only once
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              GestureDetector(
-                onTap: () async {
-                  FirebaseAuth.instance.signOut();
-                  await passBox.delete('pass');
-                  Navigator.pushNamed(context, "/login");
-                  showToast(message: "Successfully signed out");
-                },
-                child: Container(
-                  height: 45,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade600,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Logout",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                      SizedBox(
+                        height: 20,
                       ),
-                    ),
+                      GestureDetector(
+                        onTap: () async {
+                          FirebaseAuth.instance.signOut();
+                          await passBox.delete('pass');
+                          Navigator.pushNamed(context, "/login");
+                          showToast(message: "Successfully signed out");
+                        },
+                        child: Container(
+                          height: 45,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade600,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Logout",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -83,10 +83,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // If connection state is waiting, return a loading indicator
-          return CircularProgressIndicator();
+          return CircularProgressIndicator(color: Colors.green.shade600,);
         } else {
           // If user is authenticated, return HomePage, otherwise return LoginPage
-          return snapshot.hasData ? HomePage() : LoginPage();
+          return snapshot.hasData ? DevicesSuccess() : LoginPage();
         }
       },
     );

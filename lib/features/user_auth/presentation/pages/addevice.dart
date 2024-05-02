@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/devices_fail.dart';
 import 'package:flutter_firebase/features/user_auth/presentation/pages/devices_success.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,11 +35,12 @@ class _AddeviceState extends State<Addevice> {
   @override
   void initState() {
     super.initState();
-    _checkPermissionsAndEnableBluetooth();
+    _checkPermissionsAndEnableServices();
     startBluetoothScan();
   }
 
-  Future<void> _checkPermissionsAndEnableBluetooth() async {
+  Future<void> _checkPermissionsAndEnableServices() async {
+    // Bluetooth permission handling
     PermissionStatus bluetoothStatus = await Permission.bluetooth.request();
     if (bluetoothStatus == PermissionStatus.granted) {
       bool isBluetoothOn =
@@ -57,6 +59,24 @@ class _AddeviceState extends State<Addevice> {
     }
     if (bluetoothStatus == PermissionStatus.permanentlyDenied) {
       openAppSettings();
+    }
+
+    // Location permission handling
+    PermissionStatus locationStatus = await Permission.location.request();
+    if (locationStatus == PermissionStatus.denied ||
+        locationStatus == PermissionStatus.permanentlyDenied) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permission is denied.")));
+    }
+    if (locationStatus == PermissionStatus.permanentlyDenied) {
+      openAppSettings();
+    }
+
+    // Check if location service is enabled
+    bool isLocationServiceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isLocationServiceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Location service is disabled. Please enable it.")));
     }
   }
 
@@ -119,26 +139,51 @@ class _AddeviceState extends State<Addevice> {
       }
     }
 
+    bool _isLoading = false;
+
+    void _setLoading(bool isLoading) {
+      setState(() {
+        _isLoading = isLoading;
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Nearby Bluetooth Devices'),
         backgroundColor: Colors.green.shade600,
       ),
-      body: ListView.builder(
-        itemCount: devicesList.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(devicesList[index].name),
-            subtitle: Text(devicesList[index].id.toString()),
-            trailing: ElevatedButton(
-              onPressed: () {
-                connectWithESP(index);
-              },
-              child: Text("Connect"),
-              style: ElevatedButton.styleFrom(primary: Colors.green.shade600),
-            ),
-          );
+      body: RefreshIndicator(
+        color: Colors.green.shade600,
+        onRefresh: () async {
+          // Put your refresh logic here, like re-fetching Bluetooth devices
+          // or resetting the state.
+          await Future.delayed(
+              Duration(milliseconds: 1500)); // Simulate some delay
+          startBluetoothScan();
+          setState(() {}); // Refresh the UI
         },
+        child: ListView.builder(
+          physics:
+              AlwaysScrollableScrollPhysics(), // Allow for pulling to refresh
+          itemCount: devicesList.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(devicesList[index].name),
+              subtitle: Text(devicesList[index].id.toString()),
+              trailing: ElevatedButton(
+                onPressed: _isLoading
+                      ? null
+                      : () async {
+                          _setLoading(true);
+                          connectWithESP(index);
+                          _setLoading(false);
+                        },
+                child: Text("Connect"),
+                style: ElevatedButton.styleFrom(primary: Colors.green.shade600),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
