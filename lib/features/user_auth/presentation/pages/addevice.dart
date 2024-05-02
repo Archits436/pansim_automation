@@ -83,11 +83,48 @@ class _AddeviceState extends State<Addevice> {
     }
     String email = user!.email ?? "";
     String password = passBox.get('pass') ?? "";
-    String credentials = "$email,$password";
+    // String credentials = "$email,$password";
+
+    // Add error handling when connecting to the ESP32 device
+    void connectWithESP(int index) async {
+      try {
+        targetDevice = devicesList[index];
+        await targetDevice.connect();
+        await Future.delayed(Duration(seconds: 1)); // Delay for stability
+        List<BluetoothService> services = await targetDevice.discoverServices();
+        // Locate the appropriate characteristic and write credentials
+        for (BluetoothService service in services) {
+          // Replace with your service and characteristic UUIDs
+          if (service.uuid.toString().toLowerCase() ==
+              SERVICE_UUID.toLowerCase()) {
+            BluetoothCharacteristic? characteristic =
+                service.characteristics.firstWhere(
+              (c) =>
+                  c.uuid.toString().toLowerCase() ==
+                  CHARACTERISTIC_UUID.toLowerCase(),
+            );
+            if (characteristic != null) {
+              // Write credentials to the characteristic
+              await characteristic.write(utf8.encode("$email,$password"),
+                  withoutResponse: true);
+              showToast(message: "Credentials sent to ESP32 successfully!");
+              Navigator.pushNamed(context, '/devices_success');
+            } else {
+              showToast(message: "Characteristic not found");
+            }
+            break; // Exit loop after finding the characteristic
+          }
+        }
+      } catch (error) {
+        showToast(message: "Failed to connect to ESP32 or write credentials");
+        print('Error connecting to ESP32: $error');
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bluetooth Devices'),
+        title: Text('Nearby Bluetooth Devices'),
+        backgroundColor: Colors.green.shade600,
       ),
       body: ListView.builder(
         itemCount: devicesList.length,
@@ -96,49 +133,12 @@ class _AddeviceState extends State<Addevice> {
             title: Text(devicesList[index].name),
             subtitle: Text(devicesList[index].id.toString()),
             trailing: ElevatedButton(
-                onPressed: () async {
-                  targetDevice = devicesList[index];
-                  await targetDevice.connect();
-                  List<BluetoothService> services =
-                      await targetDevice.discoverServices();
-                  for (BluetoothService service in services) {
-                    if (service.uuid.toString().toLowerCase() ==
-                        SERVICE_UUID.toLowerCase()) {
-                      BluetoothCharacteristic? characteristic =
-                          service.characteristics.firstWhere(
-                        (c) =>
-                            c.uuid.toString().toLowerCase() ==
-                            CHARACTERISTIC_UUID.toLowerCase(),
-                      );
-                      if (characteristic != null) {
-                        bool isWritten = false;
-                        List<int> dataToSend = utf8.encode("$credentials");
-                        try {
-                          await characteristic.write(dataToSend,
-                              withoutResponse: true);
-                          isWritten = true;
-                        } catch (error) {
-                          print('ERROR: $error');
-                          showToast(message: "ERROR");
-                        }
-                        if (isWritten) {
-                          print('Data sent to Arduino via BLE: $dataToSend');
-                          showToast(message: "Data sent to Arduino via BLE !");
-                          print('Device linked successfully!');
-                          if (mounted) {
-                            Navigator.pushNamed(context, '/home');
-                          }
-                        } else {
-                          showToast(message: "Could not write");
-                        }
-                      } else {
-                        print('Characteristic not found');
-                        showToast(message: "Characteristic not found");
-                      }
-                    }
-                  }
-                },
-                child: Text("Connect")),
+              onPressed: () {
+                connectWithESP(index);
+              },
+              child: Text("Connect"),
+              style: ElevatedButton.styleFrom(primary: Colors.green.shade600),
+            ),
           );
         },
       ),
